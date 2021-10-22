@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as youtube;
@@ -20,7 +21,9 @@ class _SearchPageState extends State<SearchPage> {
         title: TypeAheadField(
           textFieldConfiguration: TextFieldConfiguration(
             autofocus: false,
-            decoration: const InputDecoration(hintText: 'Search YouTube'),
+            decoration: const InputDecoration(
+              hintText: 'Search YouTube',
+            ),
             onSubmitted: (query) => search(query),
           ),
           suggestionsCallback: (query) async {
@@ -44,46 +47,58 @@ class _SearchPageState extends State<SearchPage> {
                           (item is youtube.SearchVideo && !item.isLive) ||
                           item is youtube.SearchPlaylist)
                       .toList();
-                  return ListView(
-                    children: [
-                      ListView.builder(
-                        physics: const ScrollPhysics(),
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          var current = content[index];
-                          if (current is youtube.SearchVideo) {
-                            return ListTile(
-                              title: Text(current.title),
-                              subtitle: Text('Video - ' + current.duration),
-                              leading: current.thumbnails.isNotEmpty
-                                  ? Image.network(
-                                      current.thumbnails[0].url.toString())
-                                  : null,
-                              onTap: () {},
-                            );
-                          } else if (current is youtube.SearchPlaylist) {
-                            return ListTile(
-                              title: Text(current.playlistTitle),
-                              subtitle: Text('Playlist - ' +
-                                  current.playlistVideoCount.toString() +
-                                  ' videos'),
-                              leading: current.thumbnails.isNotEmpty
-                                  ? Image.network(
-                                      current.thumbnails[0].url.toString())
-                                  : null,
-                              onTap: () {},
-                            );
-                          } else {
-                            return const ListTile(title: Text('Unknown'));
-                          }
-                        },
-                        itemCount: content.length,
-                      ),
-                      TextButton(
-                        child: const Text('Load more'),
-                        onPressed: () => loadMore(),
-                      ),
-                    ],
+                  return SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            var current = content[index];
+                            if (current is youtube.SearchVideo) {
+                              return ListTile(
+                                title: Text(current.title),
+                                subtitle: Text('Video - ' + current.duration),
+                                leading: current.thumbnails.isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: current.thumbnails[0].url
+                                            .toString(),
+                                        placeholder: (context, url) =>
+                                            const CircularProgressIndicator(),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                      )
+                                    : const Icon(Icons.error),
+                                onTap: () {},
+                              );
+                            } else if (current is youtube.SearchPlaylist) {
+                              return ListTile(
+                                title: Text(current.playlistTitle),
+                                subtitle: Text('Playlist - ' +
+                                    current.playlistVideoCount.toString() +
+                                    ' videos'),
+                                leading: current.thumbnails.isNotEmpty
+                                    ? Image.network(
+                                        current.thumbnails[0].url.toString())
+                                    : null,
+                                onTap: () {},
+                              );
+                            } else {
+                              return const ListTile(title: Text('Unknown'));
+                            }
+                          },
+                          itemCount: content.length,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextButton(
+                            child: const Text('Load more'),
+                            onPressed: () => loadMore(),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 } else {
                   return const Center(child: CircularProgressIndicator());

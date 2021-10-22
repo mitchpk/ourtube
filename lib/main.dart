@@ -23,7 +23,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData.dark(),
+      theme: ThemeData.dark().copyWith(
+          appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent, elevation: 0.0)),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -49,27 +51,39 @@ class _MyHomePageState extends State<MyHomePage> {
         valueListenable: Hive.box<Playlist>('playlists').listenable(),
         builder: (context, Box<Playlist> box, widget) {
           var list = box.values.toList();
-          return ListView.builder(
-            itemBuilder: (context, index) => ListTile(
-              title: Text(list[index].name),
-              subtitle: Text(list[index].tracks.length.toString() + ' tracks'),
-              trailing: Wrap(
-                children: [
-                  IconButton(onPressed: () {}, icon: Icon(Icons.play_arrow)),
-                  IconButton(onPressed: () {}, icon: Icon(Icons.shuffle))
-                ],
-              ),
-              onTap: () {
-                //list[index].delete();
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                    builder: (context) => PlaylistPage(list[index]),
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: list.length,
+                  itemBuilder: (context, index) => ListTile(
+                    title: Text(list[index].name),
+                    subtitle:
+                        Text(list[index].tracks.length.toString() + ' tracks'),
+                    trailing: Wrap(
+                      children: [
+                        IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.play_arrow)),
+                        IconButton(
+                            onPressed: () {}, icon: const Icon(Icons.shuffle))
+                      ],
+                    ),
+                    onTap: () {
+                      //list[index].delete();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PlaylistPage(list[index]),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-            itemCount: list.length,
           );
         },
       ),

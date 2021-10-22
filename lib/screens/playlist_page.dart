@@ -14,14 +14,14 @@ class PlaylistPage extends StatelessWidget {
         title: Text(playlist.name),
       ),
       body: ListView(),
-      /*floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const SearchPage()));
         },
         tooltip: 'Add track',
         child: const Icon(Icons.add),
-      ),*/
+      ),
     );
   }
 }
