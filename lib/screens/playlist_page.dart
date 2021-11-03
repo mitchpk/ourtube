@@ -12,12 +12,38 @@ class PlaylistPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(playlist.name),
+        actions: [
+          PopupMenuButton(
+            onSelected: (action) {
+              switch (action) {
+                case 'Remove':
+                  playlist.delete();
+                  Navigator.pop(context);
+              }
+            },
+            itemBuilder: (context) {
+              return {'Remove'}.map((String choice) {
+                return PopupMenuItem(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          )
+        ],
       ),
-      body: ListView(),
+      body: ListView.builder(
+        itemCount: playlist.tracks.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(playlist.tracks[index].title),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const SearchPage()));
+              MaterialPageRoute(builder: (context) => SearchPage(playlist)));
         },
         tooltip: 'Add track',
         child: const Icon(Icons.add),

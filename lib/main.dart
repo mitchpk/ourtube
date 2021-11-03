@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:ourtube/screens/playlist_page.dart';
+import 'package:ourtube/screens/home_page.dart';
 
 import 'models/playlist.dart';
 import 'models/track.dart';
@@ -24,8 +24,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark().copyWith(
-          appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent, elevation: 0.0)),
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent, elevation: 0.0),
+      ),
+      debugShowCheckedModeBanner: false,
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -51,40 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
         valueListenable: Hive.box<Playlist>('playlists').listenable(),
         builder: (context, Box<Playlist> box, widget) {
           var list = box.values.toList();
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: list.length,
-                  itemBuilder: (context, index) => ListTile(
-                    title: Text(list[index].name),
-                    subtitle:
-                        Text(list[index].tracks.length.toString() + ' tracks'),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.play_arrow)),
-                        IconButton(
-                            onPressed: () {}, icon: const Icon(Icons.shuffle))
-                      ],
-                    ),
-                    onTap: () {
-                      //list[index].delete();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PlaylistPage(list[index]),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          );
+          return HomePage(list);
         },
       ),
       floatingActionButton: FloatingActionButton(
