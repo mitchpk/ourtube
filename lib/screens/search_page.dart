@@ -23,22 +23,25 @@ class _SearchPageState extends State<SearchPage> {
       appBar: AppBar(title: Text("Add track to " + widget.playlist.name)),
       body: Column(
         children: [
-          TypeAheadField(
-            textFieldConfiguration: TextFieldConfiguration(
-              autofocus: false,
-              decoration: const InputDecoration(
-                hintText: 'Search YouTube',
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: TypeAheadField(
+              textFieldConfiguration: TextFieldConfiguration(
+                autofocus: false,
+                decoration: const InputDecoration(
+                  hintText: 'Search YouTube',
+                ),
+                onSubmitted: (query) => search(query),
               ),
-              onSubmitted: (query) => search(query),
+              suggestionsCallback: (query) async {
+                return (await yt.search.getQuerySuggestions(query)).take(5);
+              },
+              onSuggestionSelected: (String query) => search(query),
+              itemBuilder: (context, String suggestion) =>
+                  ListTile(title: Text(suggestion)),
+              hideOnLoading: true,
+              hideOnEmpty: true,
             ),
-            suggestionsCallback: (query) async {
-              return (await yt.search.getQuerySuggestions(query)).take(5);
-            },
-            onSuggestionSelected: (String query) => search(query),
-            itemBuilder: (context, String suggestion) =>
-                ListTile(title: Text(suggestion)),
-            hideOnLoading: true,
-            hideOnEmpty: true,
           ),
           if (page != null)
             Expanded(
@@ -97,7 +100,23 @@ class _SearchPageState extends State<SearchPage> {
                                       ? Image.network(
                                           current.thumbnails[0].url.toString())
                                       : null,
-                                  onTap: () {},
+                                  onTap: () async {
+                                    var tracks = yt.playlists
+                                        .getVideos(current.playlistId);
+
+                                    for (var track in await tracks.toList()) {
+                                      widget.playlist.tracks.add(Track(
+                                          track.id.value,
+                                          track.title,
+                                          track.duration.toString(),
+                                          track.author,
+                                          track.thumbnails.highResUrl
+                                              .toString()));
+                                    }
+
+                                    widget.playlist.save();
+                                    Navigator.pop(context);
+                                  },
                                 );
                               } else {
                                 return const ListTile(title: Text('Unknown'));
@@ -106,7 +125,7 @@ class _SearchPageState extends State<SearchPage> {
                             itemCount: content.length,
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(16),
                             child: TextButton(
                               child: const Text('Load more'),
                               onPressed: () => loadMore(),

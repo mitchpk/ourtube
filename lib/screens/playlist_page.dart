@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ourtube/models/playlist.dart';
 
@@ -37,6 +38,10 @@ class PlaylistPage extends StatelessWidget {
         itemBuilder: (context, index) {
           return ListTile(
             title: Text(playlist.tracks[index].title),
+            subtitle: Text(playlist.tracks[index].duration),
+            leading: CachedNetworkImage(
+              imageUrl: playlist.tracks[index].imageUrl,
+            ),
           );
         },
       ),
